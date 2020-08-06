@@ -1,0 +1,806 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
+import '../main.dart';
+import 'dart:async';
+class MyHomePage extends StatefulWidget {
+  final empdata;
+  MyHomePage({
+    this.empdata,
+  });
+  @override
+  _MyHomePageState createState() => _MyHomePageState(empdata: empdata);
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final empdata;
+
+  _MyHomePageState({this.empdata});
+
+  static DateTime Date1 = today.subtract(new Duration(days: today.weekday - 1));
+  static DateTime Date2 = Date1.add(Duration(days: 1));
+  static DateTime Date3 = Date1.add(Duration(days: 2));
+  static DateTime Date4 = Date1.add(Duration(days: 3));
+  static DateTime Date5 = Date1.add(Duration(days: 4));
+
+//  DateTime _startDate = DateTime.now();
+//  DateTime _endDate = DateTime.now().add(Duration(days: 5));
+  static DateTime today = DateTime.now();
+  DateTime _startDate = today.subtract(new Duration(days: today.weekday - 1));
+  DateTime _endDate = Date1.add(Duration(days: 4));
+  String FormatDate(DateTime dateTime) {
+    return new DateFormat.d().format(dateTime);
+  }
+  List<String> tasks=["Requirement Analysis","Form Design","Construction (Dev/Fix)","Project Coordination","Testing (UT/DIT/SIT)",
+    "Impl. & Support","Meeting","Learning & Sharing","Others"];
+  String formatDate(DateTime date) {
+    return new DateFormat.yMMMMd().format(date);
+  }
+
+  var column = [Date1, Date2, Date3, Date4, Date5];
+  Future<Null> selectRange(BuildContext context) async {
+    final List<DateTime> picked = await DateRagePicker.showDatePicker(
+      context: context,
+      initialFirstDate: _startDate,
+      initialLastDate: _endDate,
+      firstDate: new DateTime(DateTime.now().year - 50),
+      lastDate: new DateTime(DateTime.now().year + 50),
+      selectableDayPredicate: (DateTime val) =>
+          val.weekday == 7 || val.weekday == 6 ? false : true,
+    );
+    if (picked != null && picked.length == 2) {
+      List<DateTime> days = [];
+      _startDate = picked[0];
+      _endDate = picked[1];
+      setState(() {
+        for (int i = 0; i <= _endDate.difference(_startDate).inDays; i++) {
+          days.add(_startDate.add(Duration(days: i)));
+        }
+        if (days != null && days.length == 5) {
+          Date1 = days[0];
+          Date2 = days[1];
+          Date3 = days[2];
+          Date4 = days[3];
+          Date5 = days[4];
+        }
+        column = [Date1, Date2, Date3, Date4, Date5];
+      });
+      print("${_startDate}  ${_endDate} ${days} ");
+    }
+  }
+
+  List<String> ProjectName = ['Project3', 'Project5', 'Project2'];
+  Duration duration(var s) {
+    int hours = 0;
+    int minutes = 00;
+    List<String> parts = s.split(':');
+    if (parts.length > 1) {
+      hours = int.parse(parts[parts.length - 2]);
+    }
+    minutes = (double.parse(parts[parts.length - 1])).round();
+    return Duration(
+      hours: hours,
+      minutes: minutes,
+    );
+  }
+
+  String parseDuration(var s) {
+    int hours = 00;
+    int minutes = 00;
+    List<String> parts = s.split(':');
+    if (parts.length > 1) {
+      hours = int.parse(parts[parts.length - 2]);
+    }
+    minutes = (double.parse(parts[parts.length - 1])).round();
+    if (minutes == 00) {
+      return "$hours:00";
+    }
+    return "$hours:$minutes";
+  }
+
+  String _selectedProject;
+  @override
+  Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
+    return Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: Row(children: <Widget>[
+            SizedBox(width: 30.0),
+            Text('Timesheet Entry'),
+            SizedBox(
+              width: 5.0,
+            ),
+            Card(
+                color: Colors.deepOrange,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    ' C ',
+                    style: TextStyle(
+                        fontSize: 15.0,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ))
+          ]),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(
+                Icons.person,
+                color: Colors.white,
+                size: 25.0,
+              ),
+              tooltip: empdata['userid'],
+            ),
+//            IconButton(
+//                icon: Icon(
+//                  Icons.calendar_today,
+//                  color: Colors.white,
+//                  size: 25.0,
+//                ),
+//                onPressed: () async {
+//                  await selectRange(context);
+//                }),
+            IconButton(
+                icon: Icon(Icons.exit_to_app),
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Login()));
+                }),
+          ],
+        ),
+        body: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: SizedBox(
+                height: height * 1.6,
+                child: Column(children: <Widget>[
+                  Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(children: <Widget>[
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(right: 20.0, left: 10.0),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.person_outline,
+                                    color: Colors.black,
+                                    size: 25.0,
+                                  ),
+                                ),
+                                Text(
+                                  empdata['ResourceName'],
+                                  style: TextStyle(fontSize: 15.0),
+                                ),
+                                SizedBox(
+                                  width: 60.0,
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.work,
+                                    color: Colors.black,
+                                    size: 25.0,
+                                  ),
+                                ),
+                                DropdownButton(
+                                  value: _selectedProject,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedProject = value;
+                                    });
+                                  },
+                                  items: ProjectName.map((data) {
+                                    return DropdownMenuItem(
+                                      child: new Text(data.toString()),
+                                      value: data,
+                                    );
+                                  }).toList(),
+                                )
+                              ]),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  'Assignment Manager',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15.0),
+                                ),
+                                SizedBox(
+                                  width: 20.0,
+                                ),
+                                Text(
+                                  'Aravindhan',
+                                  style: TextStyle(fontSize: 15.0),
+                                ),
+                              ]),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            left: 10.0,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              IconButton(
+                                icon: Icon(
+                                  Icons.calendar_today,
+                                  color: Colors.black,
+                                  size: 25.0,
+                                ),
+                                onPressed:() async{
+                                  await selectRange(context);
+                                }
+                              ),
+                              Container(
+                                padding: const EdgeInsets.all(5.0),
+                                decoration: BoxDecoration(
+                                  border: Border.all(width:1.0
+                                ),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(5.0),
+                                ),),
+                                child: Text(
+                                  formatDate(Date1).toString() +
+                                      ' - ' +
+                                      formatDate(Date5).toString(),
+                                  style: TextStyle(fontSize: 15.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                                            ExpansionTile(
+                      title: Text("Total hours"),
+                      trailing:Icon(Icons.access_time,color:Colors.blue),
+                      children:<Widget>[
+                        Container(
+                          height: 50.0,
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  bottom: 8.0, left: 20.0),
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    Container(
+                                        width: 20.0,
+                                        height: 20.0,
+                                        color: Colors.blue),
+                                    SizedBox(
+                                      width: 10.0,
+                                    ),
+                                    Text(
+                                      'Total Submitted Hours',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15.0),
+                                    ),
+                                    SizedBox(
+                                      width: 10.0,
+                                    ),
+                                    Text(':',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15.0)),
+                                    SizedBox(
+                                      width: 12.0,
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          color: Colors.blue,
+                                          shape: BoxShape.rectangle,
+                                          borderRadius:
+                                              BorderRadius.circular(13.0)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(4.0),
+                                        child: Text(
+                                          empdata['submitted'],
+                                          style: TextStyle(
+                                            fontSize: 15.0,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ]),
+                            ),
+                          ),
+                        ),
+                        Container(
+//                    width: 270.0,
+                          height: 50.0,
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 8.0, bottom: 8.0, left: 20.0),
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    Container(
+                                        width: 20.0,
+                                        height: 20.0,
+                                        color: Colors.green),
+                                    SizedBox(
+                                      width: 10.0,
+                                    ),
+                                    Text(
+                                      'Total Approved Hours',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15.0),
+                                    ),
+                                    SizedBox(
+                                      width: 14.0,
+                                    ),
+                                    Text(':',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15.0)),
+                                    SizedBox(
+                                      width: 13.0,
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          color: Colors.green,
+                                          shape: BoxShape.rectangle,
+                                          borderRadius:
+                                              BorderRadius.circular(13.0)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(4.0),
+                                        child: Text(
+                                          empdata['approved'],
+                                          style: TextStyle(
+                                            fontSize: 15.0,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ]),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          height: 50.0,
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 8.0, bottom: 8.0, left: 20.0),
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    Container(
+                                        width: 20.0,
+                                        height: 20.0,
+                                        color: Colors.red),
+                                    SizedBox(
+                                      width: 12.0,
+                                    ),
+                                    Text(
+                                      'Total Denied Hours',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15.0),
+                                    ),
+                                    SizedBox(
+                                      width: 30.0,
+                                    ),
+                                    Text(':',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15.0)),
+                                    SizedBox(
+                                      width: 14.0,
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.rectangle,
+                                          borderRadius:
+                                              BorderRadius.circular(13.0)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(4.0),
+                                        child: Text(
+                                          empdata['denied'],
+                                          style: TextStyle(
+                                            fontSize: 15.0,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ]),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          height: 50.0,
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 8.0, bottom: 8.0, left: 20.0),
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    Container(
+                                        width: 20.0,
+                                        height: 20.0,
+                                        color: Colors.orange),
+                                    SizedBox(
+                                      width: 12.0,
+                                    ),
+                                    Text(
+                                      'Total Progress Hours',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15.0),
+                                    ),
+                                    SizedBox(
+                                      width: 14.0,
+                                    ),
+                                    Text(':',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15.0)),
+                                    SizedBox(
+                                      width: 14.0,
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          color: Colors.orange,
+                                          shape: BoxShape.rectangle,
+                                          borderRadius:
+                                          BorderRadius.circular(13.0)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(4.0),
+                                        child: Text(
+                                          empdata['progress'].toString()??"00.00",
+                                          style: TextStyle(
+                                            fontSize: 15.0,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ]),
+                            ),
+                          ),
+                        )]),
+                      ])),
+                  Expanded(
+                    child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: SizedBox(
+                          width: width * 1.0,
+                          child: ListView.builder(
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: empdata['dates'] == null
+                                  ? 0
+                                  : empdata['dates'].length + 1,
+                              itemBuilder: (BuildContext context, int index) {
+                                if (index == 0) {
+                                  return Card(
+                                    child: Container(
+                                      color: Colors.grey.withOpacity(.5),
+                                      padding: EdgeInsets.only(
+                                          top: 10.0, right: 10.0, left: 10.0),
+                                      child: new Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Expanded(
+                                            child: Text("Task",
+                                                style: TextStyle(
+                                                    fontSize: 21.0,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                          ),
+                                          taskmethod("Requirement\nAnalysis"),
+                                          taskmethod("Form Design"),
+                                          taskmethod("Construction\n(Dev/Fix)"),
+                                          taskmethod("Project\nCoordination"),
+                                          taskmethod("Testing\n(UT/DIT/SIT)"),
+                                          taskmethod("Impl. &\nSupport"),
+                                          taskmethod("Meeting"),
+                                          taskmethod("Learning\n& Sharing"),
+                                          taskmethod("Others"),
+                                          Expanded(
+                                            child: Text("Total Hrs",
+                                                style: TextStyle(
+                                                  fontSize: 15.2,
+                                                  fontWeight: FontWeight.bold,
+                                                )),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }
+                                index -= 1;
+                                var user = empdata['dates'][index];
+                                return Container(
+                                  width: 49.0,
+                                  child: Card(
+                                      child: Container(
+//                                    padding: EdgeInsets.only(
+//                                      top: 10.0,
+//                                    ),
+                                    child: Column(
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: Padding(
+                                            padding: EdgeInsets.only(
+                                              top: 10.0,
+                                            ),
+                                            child: Text(
+                                              FormatDate(column[index])
+                                                  .toString(),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black,
+                                                fontSize: 21.0,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        TextFieldExpanded(
+                                            empdata, 'dates', index, 'h1'),
+                                        TextFieldExpanded(
+                                            empdata, 'dates', index, 'h2'),
+                                        TextFieldExpanded(
+                                            empdata, 'dates', index, 'h3'),
+                                        TextFieldExpanded(
+                                            empdata, 'dates', index, 'h4'),
+                                        TextFieldExpanded(
+                                            empdata, 'dates', index, 'h5'),
+                                        TextFieldExpanded(
+                                            empdata, 'dates', index, 'h6'),
+                                        TextFieldExpanded(
+                                            empdata, 'dates', index, 'h7'),
+                                        TextFieldExpanded(
+                                            empdata, 'dates', index, 'h8'),
+                                        TextFieldExpanded(
+                                            empdata, 'dates', index, 'Others'),
+                                        Expanded(
+                                          child: new Text(
+                                            user['total'],
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15.0),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )),
+                                );
+                              }),
+                        )),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Center(
+                      child: FloatingActionButton.extended(
+                          label: Text(
+                            'Submit',
+                          ),
+//                          icon: Icon(Icons.su),
+                          backgroundColor: Colors.blue,
+                          heroTag: 1,
+                          onPressed: () async {
+                            for (int i = 0; i < empdata['dates'].length; i++) {
+                              setState(() {
+                                h[i] = Colors.white;
+                                bg[i] = Colors.blue;
+                              });
+                            }
+                            for (int i = 0; i < empdata['dates'].length; i++) {
+                              for (int i = 0;
+                                  i < empdata['dates'].length;
+                                  i++) {
+                                setState(() {
+                                  empdata['dates'][i]['date'] = column[i];
+                                });
+                              }
+                              setState(() {
+                                empdata['dates'][i]
+                                    ['total'] = _printDuration(Duration(
+                                            minutes: duration(parseDuration(empdata['dates'][i]['h1']).toString())
+                                                .abs()
+                                                .inMinutes) +
+                                        Duration(
+                                            minutes: duration(parseDuration(empdata['dates'][i]['h2']).toString())
+                                                .abs()
+                                                .inMinutes) +
+                                        Duration(
+                                            minutes:
+                                                duration(parseDuration(empdata['dates'][i]['h3']).toString())
+                                                    .abs()
+                                                    .inMinutes) +
+                                        Duration(
+                                            minutes:
+                                                duration(parseDuration(empdata['dates'][i]['h4']).toString())
+                                                    .abs()
+                                                    .inMinutes) +
+                                        Duration(minutes: duration(parseDuration(empdata['dates'][i]['h5']).toString()).abs().inMinutes) +
+                                        Duration(minutes: duration(parseDuration(empdata['dates'][i]['h6']).toString()).abs().inMinutes) +
+                                        Duration(minutes: duration(parseDuration(empdata['dates'][i]['h7']).toString()).abs().inMinutes) +
+                                        Duration(minutes: duration(parseDuration(empdata['dates'][i]['h8']).toString()).abs().inMinutes) +
+                                        Duration(minutes: duration(parseDuration(empdata['dates'][i]['Others']).toString()).abs().inMinutes))
+                                    .toString();
+                                print(empdata['dates'][i]);
+                              });
+                              setState(() {
+                                empdata['submitted'] = _printDuration(Duration(
+                                            minutes: duration(parseDuration(empdata['dates'][0]['total']).toString())
+                                                .abs()
+                                                .inMinutes) +
+                                        Duration(
+                                            minutes:
+                                                duration(parseDuration(empdata['dates'][1]['total']).toString())
+                                                    .abs()
+                                                    .inMinutes) +
+                                        Duration(
+                                            minutes:
+                                                duration(parseDuration(empdata['dates'][2]['total']).toString())
+                                                    .abs()
+                                                    .inMinutes) +
+                                        Duration(
+                                            minutes:
+                                                duration(parseDuration(empdata['dates'][3]['total']).toString())
+                                                    .abs()
+                                                    .inMinutes) +
+                                        Duration(
+                                            minutes:
+                                                duration(parseDuration(empdata['dates'][4]['total']).toString())
+                                                    .abs()
+                                                    .inMinutes))
+                                    .toString();
+                              });
+                            }
+                            setState((){
+                              empdata['progress']="00.00";
+                            });
+                            setState((){textfield_disable(0);
+                            textfield_disable(1);
+                            textfield_disable(2);
+                            textfield_disable(3);
+                            textfield_disable(4);});
+                            for(int index=0;index<empdata['dates'].length;index++){
+                              var d=duration(empdata['dates'][index]['total']);
+                            print(d.abs().inMinutes);}
+                            print(empdata);
+//                            ProfilePage(empdata: empdata);
+//                            Navigator.push(
+//                                context,
+//                                new MaterialPageRoute(
+//                                    builder: (context) => ProfilePage(
+//                                        empdata: empdata
+//                                    )));
+
+
+                          }),
+                    ),
+                  ),
+                ]))));
+  }
+  void textfield_disable(index) {
+    var d=duration(empdata['dates'][index]['total']);
+    if(d.abs().inMinutes !=duration("00.00").abs().inMinutes){
+      enable[index]=false;
+
+    }}
+  List enable = [true, true, true, true, true];
+  Duration progress=Duration(minutes:0);
+  Expanded TextFieldExpanded(empdata, dates, index, value) {
+    return Expanded(
+      child: TextFormField(
+          textAlign: TextAlign.center,
+          initialValue: empdata[dates][index][value],
+          enabled: enable[index],
+          style: TextStyle(
+            setState((){color: empdata[dates][index][value] == "0" ? Colors.black : h[index];
+              backgroundColor:empdata[dates][index][value]=="0"?Colors.white:bg[index];})
+
+          ),
+          onChanged: (text) {
+            setState(() {
+    empdata[dates][index][value] = text;
+    print(index);
+    if(duration(empdata[dates][index][value]).abs().inMinutes > duration("8:00").abs().inMinutes){
+      _confirmDeny(context,empdata, dates, index, value);
+
+    }
+    String values = parseDuration(empdata[dates][index][value]);
+    progress =
+        Duration(minutes: duration(values).abs().inMinutes)+progress;
+    empdata['progress']=_printDuration(progress).toString();
+            });
+          }
+
+    ),
+    );
+  }
+  _confirmDeny(BuildContext context, empdata, dates, index, value) async {
+    return showDialog(
+  context: (context),
+  barrierDismissible: false,
+  builder: (context) => AlertDialog(
+  title: Text("Confirmation"),
+  content:Container(
+  height: 100,
+  child: Column(children:<Widget>[
+  Text("Timesheet exceeds 8 Hours.Do you want to Proceed? "),
+  SizedBox(height:20.0),
+  Row(                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+
+  children:<Widget>[
+  Text(tasks[index+1]),
+  Text(empdata[dates][index][value])
+
+  ])
+  ]),
+  ),
+  actions: <Widget>[
+  FlatButton(
+  child: Text("No", style: TextStyle(color: Colors.black)),
+  onPressed: () => {setState((){
+  empdata[dates][index][value]="0";
+  }),
+        Navigator.pop(context),
+//      setState((){}),
+    }
+  ),
+  FlatButton(
+  child: Text("Yes",
+  style: TextStyle(
+  fontWeight: FontWeight.bold, color: Colors.black)),
+  onPressed: () =>
+  Navigator.pop(context),
+  )
+  ],
+  elevation: 24.0,
+  ));}
+  List bg = [
+    Colors.white,
+    Colors.white,
+    Colors.white,
+    Colors.white,
+    Colors.white,
+    Colors.white
+  ];
+  List h = [
+    Colors.orange,
+    Colors.orange,
+    Colors.orange,
+    Colors.orange,
+    Colors.orange,
+    Colors.orange
+  ];
+  Expanded taskmethod(title) {
+    return Expanded(
+      child: Text(title,
+          style: TextStyle(
+            fontSize: 15.2,
+          )),
+    );
+  }
+
+  String _printDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    return "${twoDigits(duration.inHours)}:$twoDigitMinutes";
+  }
+
+}

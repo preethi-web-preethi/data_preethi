@@ -1,0 +1,248 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import 'Model/Employee.dart';
+import 'Views/Profile.dart';
+import 'Views/timesheet_entries.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: Login(),
+    );
+  }
+}
+
+class Login extends StatefulWidget {
+  @override
+  Login_State createState() => Login_State();
+}
+
+class Login_State extends State<Login> {
+  TextEditingController _username = TextEditingController();
+  TextEditingController _password = TextEditingController();
+
+  clearTextInput() {
+    _username.clear();
+    _password.clear();
+  }
+
+  bool _passwordVisible = true;
+
+  @override
+  void initState() {
+    _passwordVisible = false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 130, 10, 100),
+          child: Card(
+            elevation: 10.0,
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    color: Colors.blue,
+                    height: 50,
+                    padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                    child: Row(
+                      children: <Widget>[
+                        Container(
+                            padding: EdgeInsets.only(left: 5.0),
+                            height: 40.0,
+                            width: 40.0,
+                            child: Image.asset('images/logo.png')),
+                        Expanded(
+                            child: Container(
+                                margin: EdgeInsets.only(right: 10, left: 10),
+                                child: Text(
+                                  "Contract Timesheet Management",
+                                  style: TextStyle(
+                                      fontSize: 16.8, color: Colors.white),
+                                ))),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 35.0, bottom: 20.0, right: 20.0, left: 20.0),
+                    child: Row(
+                      children: <Widget>[
+                        IconButton(icon: Icon(Icons.person), onPressed: null),
+                        Expanded(
+                            child: Container(
+                                margin: EdgeInsets.only(right: 20, left: 10),
+                                child: TextField(
+                                  decoration:
+                                      InputDecoration(hintText: 'Username'),
+                                  controller: _username,
+                                )))
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Row(
+                      children: <Widget>[
+                        IconButton(icon: Icon(Icons.lock), onPressed: null),
+                        Expanded(
+                            child: Container(
+                                margin: EdgeInsets.only(right: 20, left: 10),
+                                child: TextFormField(
+                                  decoration: InputDecoration(
+                                      hintText: 'Password',
+                                      suffixIcon: IconButton(
+                                        icon: Icon(
+                                          _passwordVisible
+                                              ? Icons.visibility
+                                              : Icons.visibility_off,
+                                          color: Theme.of(context)
+                                              .primaryColorDark,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            _passwordVisible =
+                                                !_passwordVisible;
+                                          });
+                                        },
+                                      )),
+                                  obscureText: _passwordVisible,
+                                  controller: _password,
+                                ))),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20.0,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 30.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        FloatingActionButton.extended(
+                          label: Text(
+                            'Login',
+                          ),
+                          icon: Icon(Icons.lock_open),
+                          backgroundColor: Colors.green,
+                          heroTag: 1,
+//                      textColor: Colors.white,
+//                      color: Colors.blue,
+//                      child: Text('Login'),
+                          onPressed: () {
+                            print(_username.text + '' + _password.text);
+                            for (int i = 0;
+                                i < Employee().empdata.length;
+                                i++) {
+                              if (_username.text ==
+                                      Employee()
+                                          .empdata[i]['userid']
+                                          .toString() &&
+                                  _password.text ==
+                                      Employee()
+                                          .empdata[i]['password']
+                                          .toString()) {
+                                Navigator.push(
+                                    context,
+                                    new MaterialPageRoute(
+                                        builder: (context) => MyHomePage(
+                                            empdata: Employee().empdata[i])));
+                              }
+                            }
+                            for (int i = 0; i < Employee().admin.length; i++) {
+                              if (_username.text ==
+                                      Employee().admin[i]['id'].toString() &&
+                                  _password.text ==
+                                      Employee()
+                                          .admin[i]['password']
+                                          .toString()) {
+                                Navigator.push(
+                                    context,
+                                    new MaterialPageRoute(
+                                        builder: (context) => ProfilePage(
+                                              username: Employee().admin[i]
+                                                  ['id'],
+                                            )));
+                              }
+                            }
+                          },
+                        ),
+                        SizedBox(width: 15.0),
+                        FloatingActionButton.extended(
+                            label: Text(
+                              'Cancel',
+                            ),
+                            icon: Icon(Icons.cancel),
+                            backgroundColor: Colors.red,
+                            heroTag: 2,
+//                        textColor: Colors.white,
+//                        color: Colors.blue,
+//                        child: Text('Cancel'),
+                            onPressed: clearTextInput)
+                      ],
+                    ),
+                  )
+//                Container(
+//                    height: 50,
+//                    padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+//                    child: RaisedButton(
+//                      textColor: Colors.white,
+//                      color: Colors.blue,
+//                      child: Text('Login'),
+//                      onPressed: () {
+//                        print(_username.text + '' + _password.text);
+//                        for (int i = 0; i < Employee().empdata.length; i++) {
+//                          if (_username.text ==
+//                                  Employee().empdata[i]['userid'].toString() &&
+//                              _password.text ==
+//                                  Employee()
+//                                      .empdata[i]['password']
+//                                      .toString()) {
+//                            Navigator.push(
+//                                context,
+//                                new MaterialPageRoute(
+//                                    builder: (context) => MyHomePage(
+//                                        empdata: Employee().empdata[i])));
+//                          }
+//                        }
+//                        for (int i = 0; i < Employee().admin.length; i++) {
+//                          if (_username.text ==
+//                                  Employee().admin[i]['id'].toString() &&
+//                              _password.text ==
+//                                  Employee().admin[i]['password'].toString()) {
+//                            Navigator.push(
+//                                context,
+//                                new MaterialPageRoute(
+//                                    builder: (context) => ProfilePage(
+//                                          username: Employee().admin[i]['id'],
+//                                        )));
+//                          }
+//                        }
+//                      },
+//                    )),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
